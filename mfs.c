@@ -12,33 +12,39 @@
 #include <signal.h>
 #include <stdint.h>
 
-// #define BLOCK_SIZE 1024
-// #define NUM_BLOCKS 65536
-// #define BLOCKS_PER_FILE 1024
-// #define NUM_FILES 256
+#define BLOCK_SIZE 1024
+#define NUM_BLOCKS 65536
+#define BLOCKS_PER_FILE 1024
+#define NUM_FILES 256
+#define FIRST_DATA_BLOCK 790
+uint8_t data[NUM_BLOCKS][BLOCK_SIZE];
 
-// uint8_t data[NUM_BLOCKS][BLOCK_SIZE];
+// 512 blocks just for free block map
+uint8_t * free_blocks;
+uint8_t * free_inodes;
 
-// // directory
-// struct directoryEntry
-// {
-//     char filename[64];
-//     short in_use;
-//     int32_t inode;
-// };
+// directory
+struct directoryEntry
+{
+    char filename[64];
+    short in_use;
+    int32_t inode;
+};
 
-// struct directoryEntry * directory;
+struct directoryEntry * directory;
 
-// // inode
-// struct inode
-// {
-//     int32_t blocks[BLOCKS_PER_FILE];
-//     short in_use;
-// };
+// inode
+struct inode
+{
+    int32_t blocks[BLOCKS_PER_FILE];
+    short in_use;
+    uint8_t attribute;
+};
 
-// struct inode *inodes;
-// FILE * fp;
-
+struct inode *inodes;
+FILE * fp;
+char image_name[64];
+uint8_t image_open;
 
 #define WHITESPACE " \t\n"      // We want to split our command line up into tokens
                                 // so we need to define what delimits our tokens.
@@ -52,60 +58,134 @@
 #define MAX_HIST_ARGUMENTS 15   // History can contain no more than 15 commands
 #define MAX_PIDS 15             // To hold the pids for the 15 history commands
 
-// void init()
-// {
-//     directory = (struct directoryEntry*) &data[0][0];
-//     inodes = (struct inode*)&data[20][0];
-//     int i;
-//     for(i = 0; i < NUM_FILES; i++)
-//     {
-//         directory[i].in_use = 0;
-//         directory[i].inode = -1;
-//         memset(directory[i].filename,0 , 64);
-//         int j;
-//         for(j = 0; j < NUM_BLOCKS; j++)
-//         {
-//             inodes[i].blocks[j] = -1;
-//             inodes[i].in_use = 0;
-//         }
-//     }
-// }
+void init()
+{
+  directory = (struct directoryEntry*) &data[0][0];
+  inodes = (struct inode*)&data[20][0];
 
-// void createfs(char *filename)
-// {
-//     fp = fopen(filename,"w");
+  free_blocks = (uint8_t *)&data[277][0];
+  free_inodes = (uint8_t *)&data[19][0];
 
-//     memset(data, 0, NUM_BLOCKS * BLOCK_SIZE);
+  memset(image_name, 0, 64);
+  image_open = 0;
 
-//     fclose(fp);
-// }
+  int i;
+  for(i = 0; i < NUM_FILES; i++)
+  {
+    directory[i].in_use = 0;
+    directory[i].inode = -1;
+    free_inodes[i] = 1;
+
+    memset(directory[i].filename,0 , 64);
+    int j;
+    for(j = 0; j < NUM_BLOCKS; j++)
+    {
+      inodes[i].blocks[j] = -1;
+      inodes[i].in_use = 0;
+      inodes[i].attribute = 0;
+
+    }
+  }
+  int j;
+  for(j = 0; j < NUM_BLOCKS; j++)
+  {
+    free_blocks[j] = 1;
+  }
+}
+
+void df()
+{
+  int j;
+  int count = 0;
+  for(j = FIRST_DATA_BLOCK; j < NUM_BLOCKS; j++)
+  {
+    if(free_blocks[j])
+    {
+      count++;
+    }
+
+  }
+  printf("%d bytes free\n", count * BLOCK_SIZE);
+}
+
+void createfs(char *filename)
+{
+  fp = fopen(filename,"w");
+  strncpy(image_name, filename, strlen(filename));
+  memset(data, 0, NUM_BLOCKS * BLOCK_SIZE);
+  image_open = 1;
+  fclose(fp);
+}
+
+void savefs()
+{
+  if(image_open == 0)
+  {
+    printf("ERROR: Disk image is not open\n");
+    return;
+  }
+  fp = fopen(image_name,"w");
+  
+  
+  fwrite(&data[0][0],BLOCK_SIZE,NUM_BLOCKS,fp);
+
+  memset(image_name, 0, 64);
+  fclose(fp);
+}
+
+void openfs(char * filename)
+{
+  fp = fopen(filename,"w");
+  strncpy(image_name, filename, strlen(filename));
+  fread(&data[0][0], BLOCK_SIZE, NUM_BLOCKS, fp);
+  image_open = 1;
+  fclose(fp);
+}
+
+void closefs()
+{
+  if(image_open == 0)
+  {
+    printf("ERROR: Disk image is not open\n");
+    return;
+  }
+
+  fclose(fp);
+  image_open = 0;
+  memset(image_name, 0, 64);
+}
+
+void list()
+{
+
+  int i;
+  int not_found = 1;
+  for(i = 0; i < NUM_FILES; i++)
+  {
+    if(directory[i].in_use)
+    {
+      not_found = 0;
+      char filename[65];
+      memset(filename, 0, 65);
+      strncpy(filename, directory[i].filename, strlen(directory[i].filename));
+      printf("%s\n", filename);
+    }
+
+  }
+  if(not_found)
+  {
+    printf("ERROR: No files found.\n");
+  }
+}
+
 int main()
 {
 
     char * command_string = (char*) malloc( MAX_COMMAND_SIZE );
     
-    // fp = NULL;
+    fp = NULL;
 
-    // init();
-
-    // history
-    char *history[MAX_HIST_ARGUMENTS];
-    int hist_index = 0;
-    int hist_count = 0;
-
-    // pids
-    pid_t pid_list[MAX_PIDS];
-    int pid_index = 0;
-    int pid_count = 0;
-
-
-
-
-    // allocate memory for each index of history
-    for(int i = 0; i < MAX_HIST_ARGUMENTS; i++)
-    {
-        history[i] = (char*) malloc( MAX_COMMAND_SIZE );
-    }
+    init();
 
   while( 1 )
   {
@@ -157,16 +237,57 @@ int main()
         token_count++;
     }
 
-    // if( strcmp( "createfs",token[0]) == 0)
-    // {
-    //     if(token[1] == NULL)
-    //     {
-    //         printf("ERROR: No filename specified\n");
-    //         continue;
-    //     }
-    //     createfs(token[1]);
-    // }
+    if( strcmp("createfs", token[0]) == 0)
+    {
+      if(token[1] == NULL)
+      {
+        printf("ERROR: No filename specified\n");
+        continue;
+      }
+        createfs(token[1]);
+    }
+
+    if( strcmp("savefs", token[0]) == 0)
+    {
+      savefs();
+    }
+
+    if( strcmp("open", token[0]) == 0)
+    {
+      if(token[1] == NULL)
+      {
+        printf("ERROR: No filename specified\n");
+        continue;
+      }
+      openfs(token[1]);
+    }
+
+    if( strcmp("close", token[0]) == 0)
+    {
+      closefs();
+    }
     
+    if( strcmp("list",token[0]) == 0)
+    {
+      if( !image_open )
+      {
+        printf("ERROR: Disk image is not opened.\n");
+        continue;
+      }
+      list();
+    }
+
+    if(strcmp("df", token[0]) == 0)
+    {
+      if(!image_open)
+      {
+        printf("ERROR: Disk image is not opened.\n");
+        continue;
+      }
+      df();
+    }
+
+
 
     // Now print the tokenized input as a debug check
 
@@ -200,12 +321,6 @@ int main()
   }
 
   free( command_string );
-
-  // free memory allocated for history
-  for(int i = 0; i < MAX_HIST_ARGUMENTS; i++)
-  {
-    free(history[i]);
-  }
 
   return 0;
   // e2520ca2-76f3-90d6-0242ac120003
