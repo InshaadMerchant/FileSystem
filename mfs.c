@@ -60,6 +60,8 @@ uint8_t image_open;
 #define MAX_HIST_ARGUMENTS 15 // History can contain no more than 15 commands
 #define MAX_PIDS 15           // To hold the pids for the 15 history commands
 
+
+// Creating Encrypt and Decrypt function
 void encrypt(char *filename, char *password)
 {
   FILE *file;
@@ -121,7 +123,7 @@ void decrypt(char *filename, char *password)
   fclose(file);
 }
 
-
+// Done with encrypt and decrypt
 
 int32_t findFreeBlock()
 {
@@ -573,6 +575,8 @@ int main()
       }
       insert(token[1]);
     }
+
+    //if command was encrypt
     if (strcmp("encrypt", token[0]) == 0)
     {
 
@@ -587,6 +591,7 @@ int main()
       encrypt(token[1], token[2]);
     }
 
+    //if command was decrypt
     if (strcmp("decrypt", token[0]) == 0)
     {
 
@@ -601,13 +606,13 @@ int main()
       decrypt(token[1], token[2]);
     }
 
-    // Now print the tokenized input as a debug check
+    // // Now print the tokenized input as a debug check
 
-    int token_index = 0;
-    for (token_index = 0; token_index < token_count; token_index++)
-    {
-      printf("token[%d] = %s\n", token_index, token[token_index]);
-    }
+    // int token_index = 0;
+    // for (token_index = 0; token_index < token_count; token_index++)
+    // {
+    //   printf("token[%d] = %s\n", token_index, token[token_index]);
+    // }
 
     // exit the shell if user enters quit or exit
     if (strcmp(token[0], "quit") == 0 || strcmp(token[0], "exit") == 0)
