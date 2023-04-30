@@ -1,4 +1,4 @@
-
+#define _CRT_SECURE_NO_WARNINGS
 
 #define _GNU_SOURCE
 
@@ -59,6 +59,69 @@ uint8_t image_open;
 
 #define MAX_HIST_ARGUMENTS 15 // History can contain no more than 15 commands
 #define MAX_PIDS 15           // To hold the pids for the 15 history commands
+
+void encrypt(char *filename, char *password)
+{
+  FILE *file;
+  int block_size = strlen(password);
+  unsigned char block[block_size];
+  int bytes;
+  printf("---HI--\n");
+
+  file = fopen(filename, "rb+");
+  if (file == NULL)
+  {
+    printf("ERROR: Error opening file.\n");
+  }
+
+  do
+  {
+    
+    bytes = fread(block, 1, block_size, file);
+    for (int i = 0; i < bytes; i++)
+    {
+      block[i] ^= password[i];
+    }
+    fseek(file, -bytes, SEEK_CUR);
+    fwrite(block, 1, bytes, file);
+
+  } while (bytes == block_size);
+
+  fclose(file);
+}
+
+
+void decrypt(char *filename, char *password)
+{
+  FILE *file;
+  int block_size = strlen(password);
+  unsigned char block[block_size];
+  int bytes;
+  printf("---HI--\n");
+
+  file = fopen(filename, "rb+");
+  if (file == NULL)
+  {
+    printf("ERROR: Error opening file.\n");
+  }
+
+  do
+  {
+    
+    bytes = fread(block, 1, block_size, file);
+    for (int i = 0; i < bytes; i++)
+    {
+      block[i] ^= password[i];
+    }
+    fseek(file, -bytes, SEEK_CUR);
+    fwrite(block, 1, bytes, file);
+
+  } while (bytes == block_size);
+
+  fclose(file);
+}
+
+
 
 int32_t findFreeBlock()
 {
@@ -510,14 +573,41 @@ int main()
       }
       insert(token[1]);
     }
+    if (strcmp("encrypt", token[0]) == 0)
+    {
+
+      printf("%s %s %s ", token[0], token[1], token[2]);
+      int password_length = strlen(token[2]);
+
+      if (password_length < 8)
+      {
+        printf("The password needs to have at least 8 characters.\n");
+        continue;
+      }
+      encrypt(token[1], token[2]);
+    }
+
+    if (strcmp("decrypt", token[0]) == 0)
+    {
+
+      printf("%s %s %s ", token[0], token[1], token[2]);
+      int password_length = strlen(token[2]);
+
+      if (password_length < 8)
+      {
+        printf("The password needs to have at least 8 characters.\n");
+        continue;
+      }
+      decrypt(token[1], token[2]);
+    }
 
     // Now print the tokenized input as a debug check
 
-    // int token_index  = 0;
-    // for( token_index = 0; token_index < token_count; token_index ++ )
-    // {
-    //   printf("token[%d] = %s\n", token_index, token[token_index] );
-    // }
+    int token_index = 0;
+    for (token_index = 0; token_index < token_count; token_index++)
+    {
+      printf("token[%d] = %s\n", token_index, token[token_index]);
+    }
 
     // exit the shell if user enters quit or exit
     if (strcmp(token[0], "quit") == 0 || strcmp(token[0], "exit") == 0)
