@@ -63,16 +63,22 @@ uint8_t image_open;
 //Retrieving file data
 void retrieve (char *filename , char *newfilename)
 {
+  FILE *fp;
+  fp = fopen(newfilename, "w+");
+  FILE *fp1;
+  fp1 = fopen(filename, "w+");
 
   if (newfilename == NULL)
   {
-
+ 
     strncpy(directory[0].filename, filename, strlen(filename));
+    printf("%s has been retrieved successfully\n" , filename);
 
   }
   else
   {
-    strncpy(directory[0].newfilename, filename, strlen(filename));
+    strncpy(newfilename, filename, strlen(filename));
+    printf("%s has been retrieved successfully and placed into %s\n" , filename , newfilename);
   }
 
 }
