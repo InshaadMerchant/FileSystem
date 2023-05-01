@@ -67,7 +67,6 @@ void retrieve (char *filename , char *newfilename)
   fp = fopen(newfilename, "w");
   FILE *fp1;
   fp1 = fopen(filename, "r");
-  char a[1024];
 
   if (newfilename == NULL)
   {
@@ -79,12 +78,6 @@ void retrieve (char *filename , char *newfilename)
   else
   {
     strncpy(newfilename, filename, strlen(filename));
-    while (fgets(a, 1024, fp) != NULL) 
-    {
-
-        fprintf(fp1, "%s", a);
-
-    }
     printf("%s has been retrieved successfully and placed into %s\n" , filename , newfilename);
   }
 
