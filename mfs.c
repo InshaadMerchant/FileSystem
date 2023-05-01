@@ -394,7 +394,7 @@ void undelete_file(char* filename)
 }
 
 //attribute
-void attrib(char *filename, char *attribute)
+void attrib(char *attribute , char *filename)
 {
   if (!image_open) // Check if a file system is currently open
   {
@@ -403,8 +403,7 @@ void attrib(char *filename, char *attribute)
   }
   // Find the inode index of the file in the directory
   int32_t inode_index = -1;
-  int i;
-  for (i = 0; i < NUM_FILES; i++)
+  for (int i = 0; i < NUM_FILES; i++)
   {
     if (strcmp(directory[i].filename, filename) == 0)
     {
@@ -702,10 +701,7 @@ int main()
 
     if (strcmp("list", token[0]) == 0)
     {
-      if (strcmp("-h" , token[1]) == 0)
-      {
-
-      }
+      
       if (!image_open)
       {
         printf("ERROR: Disk image is not opened.\n");
@@ -840,8 +836,10 @@ int main()
     {
       if ( token[1] == NULL)
       {
+
         printf("ERROR: Improper Usage. attrib [+attribute] [-attribute] <filename>\n Attrib must contain an argument\n");
         continue;
+
       }
       attrib( token[1] , token[2] );
 
