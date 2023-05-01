@@ -60,6 +60,24 @@ uint8_t image_open;
 #define MAX_HIST_ARGUMENTS 15 // History can contain no more than 15 commands
 #define MAX_PIDS 15           // To hold the pids for the 15 history commands
 
+//Retrieving file data
+void retrieve (char *filename , char *newfilename)
+{
+
+  if (newfilename == NULL)
+  {
+
+    strncpy(directory[0].filename, filename, strlen(filename));
+
+  }
+  else
+  {
+    strncpy(directory[0].newfilename, filename, strlen(filename));
+  }
+
+}
+//End of retrieve function
+
 
 // Creating Encrypt and Decrypt function
 void encrypt(char *filename, char *password)
@@ -604,6 +622,21 @@ int main()
         continue;
       }
       decrypt(token[1], token[2]);
+    }
+
+     // if command was retrieve
+    if (strcmp("retrieve", token[0]) == 0)
+    {
+
+      if (token[1] == NULL)
+      {
+
+        printf("ERROR: File cannot be found.\n");
+        continue;
+
+      }
+      retrieve( token[1] , token[2] );
+
     }
 
     // // Now print the tokenized input as a debug check
