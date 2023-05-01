@@ -432,23 +432,27 @@ void attrib(char *filename, char *attribute)
 
 
 //Reading File
+//read a file with a given filename starting from a specific byte offset and print out the specified number of bytes
 void Read(char *filename, int32_t start_bytes, int32_t number_bytes)
 {
-  fp = fopen(filename, "r");
-    if(fp == NULL)
-    {
+  fp = fopen(filename, "r"); //Opening file
+    if(fp == NULL)// Checking if the file exists or not
+    { 
         printf("ERROR: File not found\n");
         return;
     }
-    if(fseek(fp, start_bytes, SEEK_SET) != 0)
+    if(fseek(fp, start_bytes, SEEK_SET) != 0) //move the file pointer to the specified start byte
     {
         printf("ERROR: Invalid start byte\n");
         fclose(fp);
         return;
     }
+    //allocate memory for a buffer to hold the specified number of bytes
     char * buffer = (char *)malloc(number_bytes);
+    //read the specified number of bytes into the buffer
     int32_t read_bytes = fread(buffer, 1, number_bytes, fp);
-    if(read_bytes != number_bytes)
+    
+    if(read_bytes != number_bytes) // Checking if the bytes read is not equal to the number of bytes
     {
         printf("ERROR: Invalid number of bytes\n");
         fclose(fp);
@@ -456,10 +460,10 @@ void Read(char *filename, int32_t start_bytes, int32_t number_bytes)
     }
     for(read_bytes = 0; read_bytes < number_bytes; read_bytes++)
     {
-        printf("%x ", buffer[read_bytes]);
+        printf("%x ", buffer[read_bytes]); //print out the bytes in hexadecimal format
     }
     printf("\n");
-    fclose(fp);
+    fclose(fp); //Closing File
 }
 
 
