@@ -64,9 +64,10 @@ uint8_t image_open;
 void retrieve (char *filename , char *newfilename)
 {
   FILE *fp;
-  fp = fopen(newfilename, "w+");
+  fp = fopen(newfilename, "w");
   FILE *fp1;
-  fp1 = fopen(filename, "w+");
+  fp1 = fopen(filename, "r");
+  char a[1024];
 
   if (newfilename == NULL)
   {
@@ -78,8 +79,17 @@ void retrieve (char *filename , char *newfilename)
   else
   {
     strncpy(newfilename, filename, strlen(filename));
+    while (fgets(a, 1024, fp) != NULL) 
+    {
+
+        fprintf(fp1, "%s", a);
+
+    }
     printf("%s has been retrieved successfully and placed into %s\n" , filename , newfilename);
   }
+
+  fclose(fp);
+  fclose(fp1);
 
 }
 //End of retrieve function
