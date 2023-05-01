@@ -702,6 +702,10 @@ int main()
 
     if (strcmp("list", token[0]) == 0)
     {
+      if (strcmp("-h" , token[1]) == 0)
+      {
+
+      }
       if (!image_open)
       {
         printf("ERROR: Disk image is not opened.\n");
@@ -834,7 +838,11 @@ int main()
 
     if(strcmp("attrib", token[0]) == 0)
     {
-
+      if ( token[1] == NULL)
+      {
+        printf("ERROR: Improper Usage. attrib [+attribute] [-attribute] <filename>\n Attrib must contain an argument\n");
+        continue;
+      }
       attrib( token[1] , token[2] );
 
     }
