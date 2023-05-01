@@ -432,7 +432,7 @@ void attrib(char *filename, char *attribute)
 
 
 //Reading File
-void read_file(char *filename, int32_t start_bytes, int32_t number_bytes)
+void Read(char *filename, int32_t start_bytes, int32_t number_bytes)
 {
   fp = fopen(filename, "r");
     if(fp == NULL)
@@ -822,7 +822,7 @@ int main()
 
       }
 
-      readFile(token[1], atoi(token[2]), atoi(token[3]));
+      Read(token[1], atoi(token[2]), atoi(token[3]));
 
     }
 
