@@ -64,25 +64,25 @@ uint8_t image_open;
 void retrieve (char *filename , char *newfilename)
 {
   FILE *fp;
-  fp = fopen(newfilename, "w");
+  fp = fopen(newfilename, "w"); //opening newfile
   FILE *fp1;
-  fp1 = fopen(filename, "r");
+  fp1 = fopen(filename, "r"); //opening hello.txt
 
   if (newfilename == NULL)
   {
  
-    strncpy(directory[0].filename, filename, strlen(filename));
+    strncpy(directory[0].filename, filename, strlen(filename)); // copying hello.txt into the current directory
     printf("%s has been retrieved successfully\n" , filename);
 
   }
   else
   {
-    strncpy(newfilename, filename, strlen(filename));
+    strncpy(newfilename, filename, strlen(filename)); // Copying hello.txt into newfile helloagain.txt
     printf("%s has been retrieved successfully and placed into %s\n" , filename , newfilename);
   }
 
-  fclose(fp);
-  fclose(fp1);
+  fclose(fp); //Closing newfile
+  fclose(fp1); //Closing hello.txt
 
 }
 //End of retrieve function
@@ -97,26 +97,26 @@ void encrypt(char *filename, char *password)
   int bytes;
   printf("---HI--\n");
 
-  file = fopen(filename, "rb+");
-  if (file == NULL)
+  file = fopen(filename, "rb+"); // Opening file hello.txt
+  if (file == NULL) // Checking if the file opens
   {
-    printf("ERROR: Error opening file.\n");
+    printf("ERROR: Error opening file.\n"); 
   }
 
   do
   {
     
-    bytes = fread(block, 1, block_size, file);
+    bytes = fread(block, 1, block_size, file); //Calculating bytes to encrypt
     for (int i = 0; i < bytes; i++)
     {
-      block[i] ^= password[i];
+      block[i] ^= password[i]; // encrypting file data with cipher text
     }
-    fseek(file, -bytes, SEEK_CUR);
-    fwrite(block, 1, bytes, file);
+    fseek(file, -bytes, SEEK_CUR); //Finding address of the file to write it back using fseek
+    fwrite(block, 1, bytes, file); //Writing it back to the file
 
   } while (bytes == block_size);
 
-  fclose(file);
+  fclose(file); // Closing hello.txt
 }
 
 
@@ -128,8 +128,8 @@ void decrypt(char *filename, char *password)
   int bytes;
   printf("---HI--\n");
 
-  file = fopen(filename, "rb+");
-  if (file == NULL)
+  file = fopen(filename, "rb+"); // Opening file hello.txt
+  if (file == NULL) // Checking if the file opens or not
   {
     printf("ERROR: Error opening file.\n");
   }
@@ -137,17 +137,17 @@ void decrypt(char *filename, char *password)
   do
   {
     
-    bytes = fread(block, 1, block_size, file);
+    bytes = fread(block, 1, block_size, file); //calculating bytes of data in file to be decrypted
     for (int i = 0; i < bytes; i++)
     {
-      block[i] ^= password[i];
+      block[i] ^= password[i]; //Decrypting file data by applying the cipher text again.
     }
-    fseek(file, -bytes, SEEK_CUR);
-    fwrite(block, 1, bytes, file);
+    fseek(file, -bytes, SEEK_CUR); //Getting address of the file to write to
+    fwrite(block, 1, bytes, file); //Writing data back to the file
 
   } while (bytes == block_size);
 
-  fclose(file);
+  fclose(file); // Closing file hello.txt
 }
 
 // Done with encrypt and decrypt
