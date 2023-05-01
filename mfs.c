@@ -396,12 +396,12 @@ void undelete_file(char* filename)
 //attribute
 void attrib(char *filename, char *attribute)
 {
-  if (!image_open)
+  if (!image_open) // Check if a file system is currently open
   {
     printf("Error: No file system is currently open.\n");
     return;
   }
-
+  // Find the inode index of the file in the directory
   int32_t inode_index = -1;
   int i;
   for (i = 0; i < NUM_FILES; i++)
@@ -412,21 +412,21 @@ void attrib(char *filename, char *attribute)
       break;
     }
   }
-
+  // Check if the file exists in the directory
   if (inode_index == -1)
   {
     printf("attrib: File '%s' not found.\n", filename);
     return;
   }
-
+  // Convert the attribute string to an integer
   int attribute_val = atoi(attribute);
-  if (attribute_val < 0 || attribute_val > 255)
+  if (attribute_val < 0 || attribute_val > 255) // Check if the attribute is within the valid range
   {
     printf("Error: Attribute must be an integer between 0 and 255.\n");
     return;
   }
 
-  inodes[inode_index].attribute = (uint8_t)attribute_val;
+  inodes[inode_index].attribute = (uint8_t)attribute_val; // Set the attribute of the file to the specified value
   printf("Attribute set.\n");
 }
 
