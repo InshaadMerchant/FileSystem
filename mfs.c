@@ -393,6 +393,75 @@ void undelete_file(char* filename)
   printf("File '%s' not found.\n", filename);
 }
 
+//attribute
+void attrib(char *filename, char *attribute)
+{
+  if (!image_open)
+  {
+    printf("Error: No file system is currently open.\n");
+    return;
+  }
+
+  int32_t inode_index = -1;
+  int i;
+  for (i = 0; i < NUM_FILES; i++)
+  {
+    if (strcmp(directory[i].filename, filename) == 0)
+    {
+      inode_index = directory[i].inode;
+      break;
+    }
+  }
+
+  if (inode_index == -1)
+  {
+    printf("attrib: File '%s' not found.\n", filename);
+    return;
+  }
+
+  int attribute_val = atoi(attribute);
+  if (attribute_val < 0 || attribute_val > 255)
+  {
+    printf("Error: Attribute must be an integer between 0 and 255.\n");
+    return;
+  }
+
+  inodes[inode_index].attribute = (uint8_t)attribute_val;
+  printf("Attribute set.\n");
+}
+
+
+//Reading File
+void read_file(char *filename, int32_t start_bytes, int32_t number_bytes)
+{
+  fp = fopen(filename, "r");
+    if(fp == NULL)
+    {
+        printf("ERROR: File not found\n");
+        return;
+    }
+    if(fseek(fp, start_bytes, SEEK_SET) != 0)
+    {
+        printf("ERROR: Invalid start byte\n");
+        fclose(fp);
+        return;
+    }
+    char * buffer = (char *)malloc(number_bytes);
+    int32_t read_bytes = fread(buffer, 1, number_bytes, fp);
+    if(read_bytes != number_bytes)
+    {
+        printf("ERROR: Invalid number of bytes\n");
+        fclose(fp);
+        return;
+    }
+    for(read_bytes = 0; read_bytes < number_bytes; read_bytes++)
+    {
+        printf("%x ", buffer[read_bytes]);
+    }
+    printf("\n");
+    fclose(fp);
+}
+
 
 void insert(char *filename)
 {
@@ -737,6 +806,32 @@ int main()
 
       }
       retrieve( token[1] , token[2] );
+
+    }
+
+    // if the command was read
+
+    if(strcmp("read", token[0]) == 0)
+    {
+
+      if(token[1] == NULL || token[2] == NULL || token[3] == NULL)
+      {
+
+          printf("ERROR: Improper Usage(read <filename> <starting bytes> <number of bytes>).\n");
+          continue;
+
+      }
+
+      readFile(token[1], atoi(token[2]), atoi(token[3]));
+
+    }
+
+    // if the command was attrib
+
+    if(strcmp("attrib", token[0]) == 0)
+    {
+
+      attrib( token[1] , token[2] );
 
     }
 
